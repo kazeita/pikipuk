@@ -1,0 +1,18 @@
+{
+  "name": "pikipuk",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Somnia — a first-person duel in a nocturnal dream arena whose tiles are traps.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "vite": "^7.3.6"
+  }
+}

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0820" />
+    <title>Somnia — The Nocturne Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <canvas id="view" aria-label="First-person duel in a nocturnal dream arena"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hud hidden">
+      <div class="round">
+        <div class="round-title" id="roundTitle">Dream I</div>
+        <div class="round-sub" id="roundSub">1 phantom remains</div>
+      </div>
+
+      <div class="crosshair" id="crosshair">
+        <span class="ch-dot"></span>
+        <span class="ch-arm a1"></span><span class="ch-arm a2"></span><span class="ch-arm a3"></span><span class="ch-arm a4"></span>
+        <span class="hitmark" id="hitmark"></span>
+      </div>
+      <div class="dmg-dir" id="dmgDir"><span></span></div>
+
+      <div class="vitals">
+        <div class="moons" id="moons"></div>
+        <div class="bar-label"><span>Lucidity</span><span id="hpText">100</span></div>
+        <div class="bar"><div class="bar-fill" id="hpFill"></div><div class="bar-ghost" id="hpGhost"></div></div>
+        <div class="dash" id="dashPips"><span class="pip"></span><span class="pip"></span><em>Dash</em></div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+      <div class="banner" id="banner"><div class="banner-main" id="bannerMain"></div><div class="banner-sub" id="bannerSub"></div></div>
+      <div class="bars" id="enemyBars"></div>
+      <div class="hint" id="hint">
+        <b>LMB</b> strike · <b>RMB</b> guard / parry · <b>F</b> kick · <b>Shift</b> dash · <b>Space</b> jump ×2, hold to glide · look down + <b>LMB</b> in air: slam
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="screen">
+      <div class="panel slim">
+        <div class="eyebrow">Weaving the dream</div>
+        <div class="load-bar"><div id="loadFill"></div></div>
+        <div class="load-step" id="loadStep">carving moonstone…</div>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div id="title" class="screen hidden">
+      <div class="panel">
+        <div class="eyebrow">A nocturne duel</div>
+        <h1>Somnia</h1>
+        <p class="lede">You fell asleep above the clouds. The arena is dreaming too — and every tile beneath you is listening.</p>
+        <div class="controls">
+          <div><b>WASD</b><span>move</span></div>
+          <div><b>Mouse</b><span>look</span></div>
+          <div><b>LMB</b><span>strike · 3-hit combo</span></div>
+          <div><b>RMB</b><span>guard · tap on impact to parry</span></div>
+          <div><b>F</b><span>kick — send knights into the holes</span></div>
+          <div><b>Shift</b><span>dash · strike right after to lunge</span></div>
+          <div><b>Space</b><span>jump, double jump, hold to glide</span></div>
+          <div><b>Air + look down + LMB</b><span>slam — shatters the floor</span></div>
+        </div>
+        <div class="lore">
+          <div><i class="swatch crack"></i>Glowing cracks: that tile is about to fall.</div>
+          <div><i class="swatch eye"></i>A faint violet eye: a hidden trap. Don't step on it — or kick someone onto it.</div>
+        </div>
+        <button class="primary" id="startBtn">Enter the dream</button>
+        <div class="settings">
+          <label>Mouse sensitivity <input type="range" id="sens" min="0.3" max="2.5" step="0.05" value="1" /></label>
+          <label>Volume <input type="range" id="vol" min="0" max="1" step="0.05" value="0.8" /></label>
+          <label class="check"><input type="checkbox" id="quality" checked /> High quality</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause -->
+    <div id="pause" class="screen hidden">
+      <div class="panel slim">
+        <div class="eyebrow">The dream holds its breath</div>
+        <h2>Paused</h2>
+        <button class="primary" id="resumeBtn">Return to the dream</button>
+        <button class="ghost" id="restartBtn">Wake and begin again</button>
+        <div class="settings">
+          <label>Mouse sensitivity <input type="range" id="sens2" min="0.3" max="2.5" step="0.05" value="1" /></label>
+          <label>Volume <input type="range" id="vol2" min="0" max="1" step="0.05" value="0.8" /></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game over -->
+    <div id="over" class="screen hidden">
+      <div class="panel slim">
+        <div class="eyebrow" id="overEyebrow">The dream lets go</div>
+        <h2 id="overTitle">You woke up</h2>
+        <div class="stats" id="stats"></div>
+        <button class="primary" id="againBtn">Sleep again</button>
+      </div>
+    </div>
+
+    <div id="fade" class="fade"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
