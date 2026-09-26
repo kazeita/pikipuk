@@ -26,28 +26,31 @@ export class Body {
     this.prevY = y;
   }
 
-  integrate(dt, arena, gravity) {
+  integrate(dt, ground, gravity) {
     this.prevY = this.pos.y;
     const wasGrounded = this.grounded;
     this.vel.y -= gravity * dt;
     this.pos.addScaledVector(this.vel, dt);
     this.landed = false;
 
-    const tile = arena.support(this.pos.x, this.pos.z, this.radius * 0.5);
-    if (tile && this.pos.y <= 0 && this.prevY >= -0.32 && this.vel.y <= 0) {
+    const surface = ground.support(this.pos.x, this.pos.z, this.radius * 0.5);
+    const h = ground.h;
+    // stick to gently descending ground (bridge arcs) instead of hopping off it
+    const stick = wasGrounded && this.vel.y <= 0 && this.pos.y - h < 0.3;
+    if (surface && this.vel.y <= 0 && this.prevY >= h - 0.32 && (this.pos.y <= h || stick)) {
       if (!wasGrounded) {
         this.landed = true;
         this.impact = -this.vel.y;
       }
-      this.pos.y = 0;
+      this.pos.y = h;
       this.vel.y = 0;
       this.grounded = true;
-      this.support = tile;
+      this.support = surface;
     } else {
       this.grounded = false;
       this.support = null;
-      if (this.pos.y < -0.02) arena.resolveWalls(this.pos, this.radius, this.height, this.vel);
     }
+    ground.resolveWalls(this.pos, this.radius, this.height, this.vel);
     this.airTime = this.grounded ? 0 : this.airTime + dt;
   }
 }

@@ -8,6 +8,8 @@ import { Sky, MOON_DIR } from '../world/Sky.js';
 import { Arena } from '../world/Arena.js';
 import { TrapDirector } from '../world/TrapDirector.js';
 import { Scenery } from '../world/Scenery.js';
+import { Ground } from '../world/Ground.js';
+import { Outposts } from '../world/Outposts.js';
 import { Effects } from '../fx/Effects.js';
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
@@ -57,6 +59,8 @@ export class Game {
     this.arena = new Arena(this.scene, this.textures, this.bus, this.fx);
     this.director = new TrapDirector(this.arena, this.bus);
     this.scenery = new Scenery(this.scene, this.textures);
+    this.ground = new Ground(this.arena);
+    this.outposts = new Outposts(this.scene, this.textures, this.ground, this.arena, this.scenery, this.bus);
     this.player = new Player(this);
     this.rig = new CameraRig(this.render.camera, this.render.vmCamera);
     this.sword = new SwordView(this.render.vmScene, this.render.vmCamera, this.textures);
@@ -363,6 +367,7 @@ export class Game {
     this.scenery.update(this.state === 'paused' ? 0 : dt, this.clock);
     if (this.state !== 'paused') this.fx.update(dt);
     this.updatePost(raw);
+    if (this.state === 'playing' || this.state === 'title') this.render.adapt(raw);
     this.render.render(this.clock);
     this.input.endFrame();
   }
@@ -452,6 +457,12 @@ export class Game {
       if (this.intermission <= 0) this.startRound(this.round + 1);
     }
 
+    this.outposts.update(dt, this.clock, player, this.fx);
+    // keep the moon's shadow map centred on the player (snapped to limit shimmer)
+    const sx = Math.round(player.body.pos.x * 2) / 2;
+    const sz = Math.round(player.body.pos.z * 2) / 2;
+    this.moonLight.target.position.set(sx, 0, sz);
+    this.moonLight.position.copy(MOON_DIR).multiplyScalar(45).add(this.moonLight.target.position);
     this.rig.update(dt, player);
     this.sword.update(dt, {
       mouse: player.mouse,

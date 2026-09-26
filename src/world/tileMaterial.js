@@ -2,10 +2,14 @@ import * as THREE from 'three';
 import { patchMaterial } from '../render/patchMaterial.js';
 
 /**
- * The carved moonstone top of a tile. Each tile owns one of these so its
- * cracks, rune heat and the sleeping-eye tell can animate independently.
+ * The carved moonstone top of the tiles, drawn with GPU instancing. Each
+ * tile's live state (cracks, rune heat, sleeping-eye glow, reform shimmer)
+ * arrives as per-instance attributes, so hundreds of tiles cost one draw call
+ * per texture variant.
+ *
+ *   aTileA = (crack, heat, eye, rune)     aTileB = (inlay, crackRot, reform, seed)
  */
-export function createTileTopMaterial(set, uniforms) {
+export function createTileTopMaterial(set, timeU) {
   const mat = new THREE.MeshStandardMaterial({
     map: set.map,
     normalMap: set.normalMap,
@@ -15,16 +19,36 @@ export function createTileTopMaterial(set, uniforms) {
     normalScale: new THREE.Vector2(1.35, 1.35),
   });
   return patchMaterial(mat, {
-    key: 'tile-top',
+    key: 'tile-top-instanced',
     uniforms: {
       runeMap: { value: set.runeMap },
       crackMap: { value: set.crackMap },
-      ...uniforms,
+      uTime: timeU,
     },
+    vertexPars: /* glsl */ `
+      attribute vec4 aTileA;
+      attribute vec4 aTileB;
+      varying vec4 vTileA;
+      varying vec4 vTileB;
+    `,
+    vertexBegin: /* glsl */ `
+      vTileA = aTileA;
+      vTileB = aTileB;
+    `,
     fragmentPars: /* glsl */ `
       uniform sampler2D runeMap;
       uniform sampler2D crackMap;
-      uniform float uCrack, uHeat, uEye, uRune, uInlay, uCrackRot, uTime, uReform, uSeed;
+      uniform float uTime;
+      varying vec4 vTileA;
+      varying vec4 vTileB;
+      #define uCrack vTileA.x
+      #define uHeat vTileA.y
+      #define uEye vTileA.z
+      #define uRune vTileA.w
+      #define uInlay vTileB.x
+      #define uCrackRot vTileB.y
+      #define uReform vTileB.z
+      #define uSeed vTileB.w
       vec2 tileRotUv(vec2 uv, float a) {
         uv -= 0.5;
         float c = cos(a), s = sin(a);

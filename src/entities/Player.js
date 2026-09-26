@@ -198,7 +198,7 @@ export class Player {
       this.gliding = true;
     }
 
-    b.integrate(dt, game.arena, gravity);
+    b.integrate(dt, game.ground, gravity);
 
     if (b.landed) {
       this.usedDouble = false;

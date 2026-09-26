@@ -117,6 +117,7 @@ export class Tile {
       this.ghost.visible = true;
       this.t = 0;
       this.voidDur = delay;
+      this.dirty = true;
     }
   }
 

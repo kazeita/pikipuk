@@ -89,7 +89,7 @@ export class Enemy {
       const sz = -_d.x * side;
       const tx = this.body.pos.x + sx * 2.4;
       const tz = this.body.pos.z + sz * 2.4;
-      if (this.game.arena.hazardAt(tx, tz) === 0) {
+      if (this.game.ground.hazardAt(tx, tz) === 0) {
         this.body.vel.x = sx * 11;
         this.body.vel.z = sz * 11;
         this.setState('dodge');
@@ -165,7 +165,7 @@ export class Enemy {
   steer(want) {
     const len = want.length();
     if (len < 0.05) return want.set(0, 0, 0);
-    const arena = this.game.arena;
+    const arena = this.game.ground;
     const p = this.body.pos;
     _d.copy(want).divideScalar(len);
     let bestScore = -Infinity;
@@ -331,7 +331,7 @@ export class Enemy {
 
     // panic: standing on a cracking tile – run for solid stone
     if (b.grounded && control !== false && this.alive && this.state !== 'spawn') {
-      const hz = arena.hazardAt(b.pos.x, b.pos.z);
+      const hz = game.ground.hazardAt(b.pos.x, b.pos.z);
       if (hz >= 1) {
         const safe = arena.tilesNear(b.pos.x, b.pos.z, 5.5, (t) => t.hazard === 0).sort(
           (a, c) => Math.hypot(a.x - b.pos.x, a.z - b.pos.z) - Math.hypot(c.x - b.pos.x, c.z - b.pos.z),
@@ -346,8 +346,8 @@ export class Enemy {
 
     // leap a single gap to reach the player
     if (b.grounded && this.jumpCd <= 0 && (this.state === 'approach' || this.state === 'circle') && dist > 2.8) {
-      const h1 = arena.hazardAt(b.pos.x + dirP.x * 1.4, b.pos.z + dirP.z * 1.4);
-      const h2 = arena.hazardAt(b.pos.x + dirP.x * 3.1, b.pos.z + dirP.z * 3.1);
+      const h1 = game.ground.hazardAt(b.pos.x + dirP.x * 1.4, b.pos.z + dirP.z * 1.4);
+      const h2 = game.ground.hazardAt(b.pos.x + dirP.x * 3.1, b.pos.z + dirP.z * 3.1);
       if (h1 >= 3 && h2 === 0 && Math.random() < dt * 3) {
         b.vel.x = dirP.x * d.speed * 1.2;
         b.vel.z = dirP.z * d.speed * 1.2;
@@ -381,7 +381,7 @@ export class Enemy {
       }
     }
 
-    b.integrate(dt, arena, 24);
+    b.integrate(dt, game.ground, 24);
     if (b.grounded && this.alive) arena.onStep(b.support, this);
     if (!b.grounded && b.pos.y < -1.0 && this.state !== 'fall' && this.state !== 'dying') {
       if (this.state === 'windup' || this.state === 'strike') this.cooldown = 1;

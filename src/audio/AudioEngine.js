@@ -362,6 +362,7 @@ export class AudioEngine {
       this.tone({ freq: 440, freqEnd: 880, type: 'sine', attack: 0.5, decay: 0.3, gain: 0.03 * s.gain, pan: s.pan, wet: 0.8 });
     });
 
+    on('well:drink', () => [0, 7, 12].forEach((iv, k) => this.musicBox(midi(79 + iv), 0.05, k * 0.08)));
     on('round:start', () => [0, 7, 14, 19].forEach((iv, k) => this.musicBox(midi(55 + iv), 0.08, k * 0.2)));
     on('round:clear', () => [0, 4, 7, 11, 14, 19].forEach((iv, k) => this.musicBox(midi(67 + iv), 0.07, k * 0.09)));
     on('game:over', () => [0, -2, -5, -9, -12].forEach((iv, k) => this.musicBox(midi(62 + iv), 0.08, k * 0.3)));

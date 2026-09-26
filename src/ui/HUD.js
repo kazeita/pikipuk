@@ -40,6 +40,7 @@ export class HUD {
 
     bus.on('enemy:hit', () => this.hit());
     bus.on('player:parry', () => this.toast('Parry'));
+    bus.on('well:drink', () => this.toast('The moonwell restores you'));
     bus.on('enemy:guardbreak', () => this.toast('Guard broken'));
     bus.on('player:dodge', () => this.toast('Slipped through'));
     bus.on('enemy:killed', ({ byTrap }) => this.toast(byTrap ? 'Dreamfall' : 'Unmade'));

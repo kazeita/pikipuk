@@ -43,9 +43,13 @@ export class SwordTrail {
         fragmentShader: /* glsl */ `
           uniform vec3 uColor; varying float vA; varying float vE;
           void main() {
-            float core = pow(vE, 6.0);
+            // clamp: MSAA can extrapolate varyings slightly outside [0,1], and pow() of a
+            // negative base is NaN on real GPUs – bloom then smears it into a black screen
+            float e = clamp(vE, 0.0, 1.0);
+            float a = clamp(vA, 0.0, 1.0);
+            float core = e * e * e * e * e * e;
             vec3 c = mix(uColor * vec3(0.8, 0.45, 1.0), uColor + vec3(1.0), core);
-            gl_FragColor = vec4(c * vA * vA * (0.05 + 0.95 * pow(vE, 2.2)) * 0.8, 1.0);
+            gl_FragColor = vec4(c * a * a * (0.05 + 0.95 * pow(e, 2.2)) * 0.8, 1.0);
           }
         `,
       }),

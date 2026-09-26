@@ -15,7 +15,11 @@ export class RenderSystem {
   constructor(canvas) {
     this.canvas = canvas;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', stencil: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    this.baseRatio = Math.min(window.devicePixelRatio || 1, 1.25);
+    this.scale = 1;
+    this.frameEMA = 1 / 60;
+    this.adaptT = 0;
+    renderer.setPixelRatio(this.baseRatio);
     renderer.setSize(innerWidth, innerHeight, false);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.95;
@@ -46,6 +50,18 @@ export class RenderSystem {
     this.dream = new ShaderPass(DreamShader);
     this.composer.addPass(this.worldPass);
     this.composer.addPass(this.vmPass);
+    // Safety net: a single NaN/Inf pixel would be smeared across the frame by bloom.
+    this.scrub = new ShaderPass({
+      uniforms: { tDiffuse: { value: null } },
+      vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: `uniform sampler2D tDiffuse; varying vec2 vUv;
+        void main() {
+          vec4 c = texture2D(tDiffuse, vUv);
+          if (any(isnan(c)) || any(isinf(c))) c = vec4(0.0, 0.0, 0.0, 1.0);
+          gl_FragColor = vec4(min(c.rgb, vec3(64.0)), 1.0);
+        }`,
+    });
+    this.composer.addPass(this.scrub);
     this.composer.addPass(this.bloom);
     this.composer.addPass(this.output);
     this.composer.addPass(this.dream);
@@ -60,10 +76,33 @@ export class RenderSystem {
   }
 
   setQuality(high) {
-    this.renderer.setPixelRatio(high ? Math.min(window.devicePixelRatio || 1, 1.5) : 0.85);
-    this.bloom.enabled = true;
+    this.baseRatio = high ? Math.min(window.devicePixelRatio || 1, 1.25) : 0.75;
     this.renderer.shadowMap.enabled = high;
+    this.scale = 1;
+    this.applyScale();
+  }
+
+  applyScale() {
+    this.renderer.setPixelRatio(this.baseRatio * this.scale);
     this.resize();
+  }
+
+  /**
+   * Dynamic resolution: if frames run long, render fewer pixels; creep back up
+   * when there is headroom. Keeps laptops near 60 fps instead of 15.
+   */
+  adapt(rawDt) {
+    this.frameEMA = this.frameEMA * 0.92 + rawDt * 0.08;
+    this.adaptT += rawDt;
+    if (this.adaptT < 1.0) return;
+    this.adaptT = 0;
+    if (this.frameEMA > 1 / 50 && this.scale > 0.5) {
+      this.scale = Math.max(0.5, this.scale - (this.frameEMA > 1 / 30 ? 0.2 : 0.1));
+      this.applyScale();
+    } else if (this.frameEMA < 1 / 58 && this.scale < 1) {
+      this.scale = Math.min(1, this.scale + 0.05);
+      this.applyScale();
+    }
   }
 
   resize() {

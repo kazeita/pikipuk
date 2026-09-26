@@ -2,10 +2,10 @@
 // feel of the arena, the traps and the fight can be adjusted in one place.
 
 export const ARENA = {
-  tileSize: 1.5,        // metres per tile
+  tileSize: 3,        // metres per tile
   gap: 0.3,             // visual seam between tiles
   grid: 39,             // grid cells per side (odd, so a tile sits at the centre)
-  radius: 15.6,         // tiles whose centre lies inside this circle exist
+  radius: 40,         // tiles whose centre lies inside this circle exist
   thickness: 0.2,      // slab depth
 };
 

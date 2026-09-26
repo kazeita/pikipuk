@@ -65,7 +65,8 @@ export class Sky {
             col = mix(col, zenith, smoothstep(0.3, 0.95, h));
 
             // milky nebula band
-            float band = exp(-pow((d.y * 0.85 + d.x * 0.45 + d.z * 0.2 - 0.3) * 2.4, 2.0));
+            float bx = (d.y * 0.85 + d.x * 0.45 + d.z * 0.2 - 0.3) * 2.4;
+            float band = exp(-bx * bx);
             float n = fbm3(d * 2.4 + vec3(0.0, uTime * 0.003, 0.0));
             float n2 = fbm3(d * 5.0 + vec3(3.1, 1.7, uTime * 0.002));
             vec3 neb = mix(vec3(0.42, 0.12, 0.6), vec3(0.06, 0.34, 0.58), n2);

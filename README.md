@@ -49,6 +49,23 @@ randomised clock and caps how much of the floor can be missing at once:
 
 Crackles, clicks and collapses are positional, so you can hear the floor fail behind you.
 
+## Outposts
+
+Three arched bridges of floating planks lead off the arena edge to walkable
+islands (`src/world/Outposts.js`). They have no traps, stone pillars you can
+fight around, and a **moonwell** that restores up to 45 lucidity before it runs
+dry and slowly refills. The knights follow you across. Walkable surfaces and
+pillar collisions live in `src/world/Ground.js`.
+
+## Performance
+
+- Tiles are GPU-instanced: per-tile crack/heat/eye state is passed as instance
+  attributes, so the whole floor costs a handful of draw calls at any tile count.
+- Dynamic resolution (`RenderSystem.adapt`) lowers render scale when frames run
+  long and raises it again when there is headroom.
+- The moon's shadow map follows the player.
+- Unticking "High quality" drops shadows and renders at 0.75× resolution.
+
 ## Architecture
 
 ```
@@ -66,7 +83,8 @@ src/
   textures/  TextureBank.js    builds everything at load
              stoneTile.js      carved moonstone: albedo/normal/roughness/rune/crack maps
              library.js        rock, engraved armour, star cloth, porcelain masks, damascus blade, moon…
-  world/     Arena.js, Tile.js, TrapDirector.js, tileMaterial.js, Sky.js, Scenery.js
+  world/     Arena.js, Tile.js, TrapDirector.js, tileMaterial.js, Sky.js, Scenery.js,
+             Ground.js (walkable surfaces + pillars), Outposts.js (bridges, islands, moonwells)
   entities/  Body.js (shared capsule physics), Player.js, Enemy.js (AI), EnemyModel.js
   combat/    PlayerCombat.js, SwordView.js, SwordTrail.js, weapons.js
   fx/        Effects.js, Particles.js
